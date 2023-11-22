@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:pixel_adventure/components/background_tile.dart';
+import 'package:pixel_adventure/components/checkpoint.dart';
 import 'package:pixel_adventure/components/collision_block.dart';
 import 'package:pixel_adventure/components/fruit.dart';
 import 'package:pixel_adventure/components/player.dart';
+import 'package:pixel_adventure/components/saw.dart';
 import 'package:pixel_adventure/pixel_adventure.dart';
 
 class Level extends World with HasGameRef<PixelAdventure> {
@@ -35,24 +37,14 @@ class Level extends World with HasGameRef<PixelAdventure> {
 
   void _scrollingBackground() {
     final backgroundLayer = level.tileMap.getLayer('Background');
-    const tileSize = 64;
-
-    final numTilesY = (game.size.y / tileSize).floor();
-    final numTilesX = (game.size.x / tileSize).floor();
 
     if (backgroundLayer != null) {
       final backgroundColor = backgroundLayer.properties.getValue<String>("BackgroundColor");
-
-      for (double y = 0; y < game.size.y / numTilesY; y++) {
-        for (double x = 0; x < numTilesX; x++) {
-          final backgroundTile = BackgroundTile(
-            color: backgroundColor ?? "Gray",
-            position: Vector2(x * tileSize, y * tileSize - tileSize),
-          );
-
-          add(backgroundTile);
-        }
-      }
+      final backgroundTile = BackgroundTile(
+        color: backgroundColor ?? "Gray",
+        position: Vector2.zero(),
+      );
+      add(backgroundTile);
     }
   }
 
@@ -64,6 +56,7 @@ class Level extends World with HasGameRef<PixelAdventure> {
         switch (spawnPoint.type) {
           case "Player":
             player.position = Vector2(spawnPoint.x, spawnPoint.y);
+            player.scale.x = 1; // always face right
             add(player);
             break;
           case "Fruit":
@@ -73,6 +66,30 @@ class Level extends World with HasGameRef<PixelAdventure> {
               size: Vector2(spawnPoint.width, spawnPoint.height),
             );
             add(fruit);
+            break;
+          case "Saw":
+            final isVertical = spawnPoint.properties.getValue<bool>("isVertical");
+            final offNeg = spawnPoint.properties.getValue<double>("offNeg");
+            final offPos = spawnPoint.properties.getValue<double>("offPos");
+
+            if (isVertical != null && offNeg != null && offPos != null) {
+              final saw = Saw(
+                isVertical: isVertical,
+                offNeg: offNeg,
+                offPos: offPos,
+                position: Vector2(spawnPoint.x, spawnPoint.y),
+                size: Vector2(spawnPoint.width, spawnPoint.height),
+              );
+              add(saw);
+            }
+            break;
+          case "Checkpoint":
+            final checkpoint = Checkpoint(
+              position: Vector2(spawnPoint.x, spawnPoint.y),
+              size: Vector2(spawnPoint.width, spawnPoint.height),
+            );
+            add(checkpoint);
+            break;
           default:
         }
       }
