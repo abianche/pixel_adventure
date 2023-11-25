@@ -1,28 +1,17 @@
-name: Deploy Flutter Web App to GitHub Pages
+name: Gh-Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v1
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+      - uses: bluefireteam/flutter-gh-pages@v7
         with:
-          flutter-version: "3.16.0"
-
-      - name: Build Flutter Web App
-        run: flutter build web --release
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GH_PAGES_DEPLOY_TOKEN }}
-          publish_dir: ./build/web
+          baseHref: /pixel_adventure/
+          webRenderer: canvaskit
